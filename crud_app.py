@@ -26,7 +26,6 @@ def create_item():
 def update_item(item_id):
     if item_id in storage:
         data = request.json
-        storage[item_id].update(data)
         return jsonify(storage[item_id]), 200
     return jsonify({"error": "Item not found"}), 404
 

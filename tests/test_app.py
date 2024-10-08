@@ -34,3 +34,16 @@ def test_update_item(item_id, name, value):
             assert response.status_code == 200
         else:
             assert response.status_code == 404
+
+@given(item_id=st.integers(min_value=1), name=st.text(), value=st.integers())
+def test_get_updated_item(item_id, name, value):
+    clear_storage()
+    with app.test_client() as client:
+        # Add an item before fetching
+        client.post("/item", json={"name": "item1", "value": 1})
+        response = client.put(f"/item/{item_id}", json={"name": "item2", "value": 1})
+        if item_id == 1:
+            assert response.get_json()['name'] == "item2"
+            assert response.get_json()['value'] == 1
+        else:
+            assert response.status_code == 404
