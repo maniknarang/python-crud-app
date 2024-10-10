@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple CRUD App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px;
+        }
+        .item {
+            border-bottom: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple CRUD App</h1>
+    
+    <div>
+        <h2>Create item</h2>
+        <input type="text" id="itemName" placeholder="Item name">
+        <input type="number" id="itemValue" placeholder="Item value">
+        <button onclick="createItem()">Create</button>
+    </div>
+
+    <div>
+        <h2>Items</h2>
+        <button onclick="getItems()">Refresh</button>
+        <div id="items"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:5000';
+
+        function createItem() {
+            const name = document.getElementById('itemName').value;
+            const value = document.getElementById('itemValue').value;
+            
+            fetch(`${API_URL}/item`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(`Item created: ${data.name}`);
+                getItems();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function getItems() {
+            fetch(`${API_URL}/items`)
+            .then(response => response.json())
+            .then(data => {
+                const itemsDiv = document.getElementById('items');
+                itemsDiv.innerHTML = '';
+                data.forEach(item => {
+                    itemsDiv.innerHTML += `
+                        <div class="item">
+                            <strong>Item ${item.id}:</strong> ${item.name} - ${item.value}
+                            <button onclick="deleteItem(${item.id})">Delete</button>
+                            <button onclick="updateItem(${item.id}, '${item.name}', ${item.value})">Edit</button>
+                        </div>
+                    `;
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function deleteItem(itemId) {
+            fetch(`${API_URL}/item/${itemId}`, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                getItems();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function updateItem(itemId, currentName, currentValue) {
+            const newName = prompt("Enter new name:", currentName);
+            const newValue = prompt("Enter new value:", currentValue);
+            
+            fetch(`${API_URL}/item/${itemId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: newName, value: newValue })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(`Item updated: ${data.name}`);
+                getItems();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        window.onload = getItems;
+    </script>
+</body>
+</html>

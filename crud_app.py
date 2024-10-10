@@ -1,7 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 storage = {}
+
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 @app.route("/items", methods=["GET"])
 def get_items():
@@ -26,6 +30,7 @@ def create_item():
 def update_item(item_id):
     if item_id in storage:
         data = request.json
+        storage[item_id]["name"] = data["name"]
         return jsonify(storage[item_id]), 200
     return jsonify({"error": "Item not found"}), 404
 
